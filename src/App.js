@@ -1,24 +1,28 @@
-import logo from './logo.svg';
 import './App.css';
+import LandingPage from './components/Homepage';
+import Navbar from './components/Navbar';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import StudyPlannerPage from './components/StudyPlanner';
+import FocusTrackingPage from './components/FocusTracking';
+import DashboardPage from './components/Dashboard';
+import SmartStudyRecommendations from './components/SmartStudy';
+import StudyGroups from './components/StudyGroups';
+import SettingsPage from './components/Settings';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Navbar/>
+      <Routes>
+        <Route path='/' element = {<LandingPage/>}/>
+        <Route path='/studyplanner' element = {<StudyPlannerPage/>}/>
+        <Route path='/focustracking' element = {<FocusTrackingPage/>}/>
+        <Route path='/dashboard' element = {<DashboardPage/>}/>
+        <Route path='/smartstudy' element = {<SmartStudyRecommendations/>}/>
+        <Route path='/studygroups' element = {<StudyGroups/>}/>
+        <Route path='/settings' element = {<SettingsPage/>}/>
+      </Routes>
+    </Router>
   );
 }
 
