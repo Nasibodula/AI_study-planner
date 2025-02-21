@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -11,7 +10,12 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/authDB')
@@ -36,13 +40,42 @@ userSchema.pre('save', async function(next) {
 
 const User = mongoose.model('User', userSchema);
 
-// Import auth routes
-const authRoutes = require('./auth');
+// Auth middleware
+const authMiddleware = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+    req.userId = decoded.userId;
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
+};
+
+// Import routes
+const authRoutes = require('./middleware/auth');
+const taskRoutes = require('./routes/tasks');
+const reminderRoutes = require('./routes/reminders');
+
+// Use routes
 app.use('/api/auth', authRoutes(User));
+// Apply auth middleware to protected routes
+app.use('/api/tasks', authMiddleware, taskRoutes);
+app.use('/api/reminders', authMiddleware, reminderRoutes);
 
 // Root route
 app.get('/', (req, res) => {
   res.send('Auth API Running');
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong!', error: err.message });
 });
 
 // Start server
