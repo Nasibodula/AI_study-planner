@@ -60,12 +60,15 @@ const authMiddleware = async (req, res, next) => {
 const authRoutes = require('./middleware/auth');
 const taskRoutes = require('./routes/tasks');
 const reminderRoutes = require('./routes/reminders');
+const sessionRoutes = require('./routes/sessionRoutes');
+
 
 // Use routes
 app.use('/api/auth', authRoutes(User));
 // Apply auth middleware to protected routes
 app.use('/api/tasks', authMiddleware, taskRoutes);
 app.use('/api/reminders', authMiddleware, reminderRoutes);
+app.use('/api/sessions', authMiddleware, sessionRoutes);
 
 // Root route
 app.get('/', (req, res) => {
