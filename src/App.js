@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import LandingPage from './Pages/Homepage';
 import AuthPage from './Pages/Authpage';
@@ -147,6 +147,30 @@ const AppRoutes = () => {
 };
 
 const App = () => {
+
+  useEffect(() => {
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/service-worker.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration);
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+    }
+
+    // Listen for messages from the Service Worker
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data.type === 'focusUpdate') {
+        const { focusedTime, totalTime } = event.data;
+        const focusScore = ((focusedTime / totalTime) * 100).toFixed(2);
+        console.log(`Focus Score: ${focusScore}%`);
+        // Update global state or UI with focus data
+      }
+    });
+  }, []);
   return (
     <Router>
       <AuthProvider>

@@ -32,6 +32,20 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [studyTimeData, setStudyTimeData] = useState([]);
+  const [focusScore, setFocusScore] = useState(0);
+  useEffect(() => {
+    const focusedTime = parseInt(localStorage.getItem('focusedTime') || 0, 10);
+    const totalTime = parseInt(localStorage.getItem('totalTime') || 0, 10);
+
+    // Calculate focus score only if totalTime is greater than 0
+    if (totalTime > 0) {
+      const score = ((focusedTime / totalTime) * 100).toFixed(2);
+      setFocusScore(score);
+    } else {
+      setFocusScore('0.00'); // Default score when no tracking data is available
+    }
+  }, []);
+
 
   // Fetch tasks from the backend
   useEffect(() => {
@@ -65,6 +79,7 @@ const DashboardPage = () => {
       <header className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-2xl font-bold text-gray-800">Dashboard & Analytics</h1>
+          <p>Your focus score: {focusScore}%</p>
         </div>
       </header>
 

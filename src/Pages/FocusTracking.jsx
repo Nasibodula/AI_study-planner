@@ -6,6 +6,25 @@ import { drawConnectors } from '@mediapipe/drawing_utils';
 import Webcam from 'react-webcam';
 
 function FocusTrackingPage() {
+
+  const startTracking = () => {
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage('startTracking');
+    }
+  };
+
+  const stopTracking = () => {
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage('stopTracking');
+    }
+  };
+
+  useEffect(() => {
+    startTracking();
+    return () => {
+      stopTracking();
+    };
+  }, []);
   // Setup references
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
@@ -14,15 +33,16 @@ function FocusTrackingPage() {
   const [focusScore, setFocusScore] = useState(0);
   const [focusedTime, setFocusedTime] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
+  const [peakFocus, setPeakFocus] = useState(0); // Track peak focus score
+  const [showWarning, setShowWarning] = useState(false); // Show focus drop warning
   var camera = null;
-  
 
   // Function to calculate focus score
   const calculateFocusScore = (focusedTime, totalTime) => {
     return totalTime === 0 ? 0 : ((focusedTime / totalTime) * 100).toFixed(2);
   };
 
-  // Function to handle focus detection
+  // Function to detect focus
   const detectFocus = (landmarks) => {
     if (!landmarks) return false;
   
@@ -51,10 +71,7 @@ function FocusTrackingPage() {
     return isAligned && isLookingForward;
   };
 
-
-
   
-
   const onResults = async (results) => {
     const canvasElement = canvasRef.current;
     const canvasCtx = canvasElement.getContext("2d");
@@ -128,12 +145,26 @@ function FocusTrackingPage() {
   useEffect(() => {
     const score = calculateFocusScore(focusedTime, totalTime);
     setFocusScore(score);
+
+    // Update peak focus
+    if (score > peakFocus) {
+      setPeakFocus(score);
+    }
+
+    // Detect drastic focus drop
+    if (peakFocus - score > 20) {
+      setShowWarning(true);
+    } else {
+      setShowWarning(false);
+    }
   }, [focusedTime, totalTime]);
 
   const handleStartTracking = () => {
     setIsTracking(true);
     setFocusedTime(0);
     setTotalTime(0);
+    setPeakFocus(0); // Reset peak focus on start
+    setShowWarning(false); // Reset warning on start
   };
 
   const handleStopTracking = () => {
@@ -145,65 +176,64 @@ function FocusTrackingPage() {
   };
 
   return (
-    <div className="App" style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
+    <div className="App relative w-full h-screen overflow-hidden bg-gray-900">
+      {/* Webcam Feed */}
       <Webcam
         ref={webcamRef}
-        style={{
-          position: "absolute",
-          marginLeft: "auto",
-          marginRight: "auto",
-          left: 0,
-          right: 0,
-          textAlign: "center",
-          zIndex: 1, // Lower z-index for video
-          width: 640,
-          height: 480,
-        }}
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"
+        width={640}
+        height={480}
       />
+
+      {/* Canvas for Overlays */}
       <canvas
         ref={canvasRef}
-        style={{
-          position: "absolute",
-          marginLeft: "auto",
-          marginRight: "auto",
-          left: 0,
-          right: 0,
-          textAlign: "center",
-          zIndex: 2, // Higher z-index for canvas
-          width: 640,
-          height: 480,
-        }}
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20"
+        width={640}
+        height={480}
       />
-      <div
-        style={{
-          position: "absolute",
-          bottom: 20,
-          left: 20,
-          zIndex: 3, // Highest z-index for focus status and buttons
-          color: "white",
-          backgroundColor: "rgba(0, 0, 0, 0.7)",
-          padding: "10px",
-          borderRadius: "8px",
-        }}
-      >
-        <p>Focus Status: {isFocused ? "Focused" : "Distracted"}</p>
-        <p>Focus Score: {focusScore}%</p>
+
+      {/* Focus Status and Controls */}
+      <div className="absolute bottom-8 left-8 z-30 bg-black bg-opacity-70 text-white p-4 rounded-lg shadow-lg">
+        <p className="text-lg font-semibold">
+          Focus Status: <span className={isFocused ? "text-green-400" : "text-red-400"}>
+            {isFocused ? "Focused" : "Distracted"}
+          </span>
+        </p>
+        <p className="text-lg font-semibold">Focus Score: {focusScore}%</p>
         {!isTracking ? (
           <button
             onClick={handleStartTracking}
-            style={{ marginRight: 10, padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}
+            className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
           >
             Start Tracking
           </button>
         ) : (
           <button
             onClick={handleStopTracking}
-            style={{ padding: "5px 10px", borderRadius: "4px", cursor: "pointer" }}
+            className="mt-2 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
           >
             Stop Tracking
           </button>
         )}
       </div>
+
+      {/* Peak Focus Card */}
+      <div className="absolute top-8 right-8 z-30 bg-black bg-opacity-70 text-white p-4 rounded-lg shadow-lg">
+        <p className="text-lg font-semibold">Peak Focus: {peakFocus}%</p>
+      </div>
+
+      {/* Duration Card */}
+      <div className="absolute top-24 right-8 z-30 bg-black bg-opacity-70 text-white p-4 rounded-lg shadow-lg">
+        <p className="text-lg font-semibold">Duration: {totalTime}s</p>
+      </div>
+
+      {/* Focus Drop Warning */}
+      {showWarning && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 bg-red-500 text-white p-4 rounded-lg shadow-lg">
+          <p className="text-lg font-semibold">Warning: Focus Dropping!</p>
+        </div>
+      )}
     </div>
   );
 }
