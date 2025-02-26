@@ -23,63 +23,36 @@ function FocusTrackingPage() {
   };
 
   // Function to handle focus detection
-  // const detectFocus = (landmarks) => {
-  //   if (!landmarks) return false;
+  const detectFocus = (landmarks) => {
+    if (!landmarks) return false;
   
-  //   // Get relevant landmarks
-  //   const leftEye = landmarks[159]; // Left eye landmark
-  //   const rightEye = landmarks[386]; // Right eye landmark
-  //   const noseTip = landmarks[1]; // Nose tip landmark
-  //   const leftEyeInner = landmarks[145]; // Left eye inner corner
-  //   const rightEyeInner = landmarks[374]; // Right eye inner corner
+    // Get relevant landmarks
+    const leftEye = landmarks[159]; // Left eye landmark
+    const rightEye = landmarks[386]; // Right eye landmark
+    const noseTip = landmarks[1]; // Nose tip landmark
+    const leftEyeInner = landmarks[145]; // Left eye inner corner
+    const rightEyeInner = landmarks[374]; // Right eye inner corner
   
-  //   // Calculate eye position relative to the nose
-  //   const eyeDistance = Math.abs(leftEye.x - rightEye.x);
-  //   const eyeNoseDistance = Math.abs((leftEye.y + rightEye.y) / 2 - noseTip.y);
+    // Calculate eye position relative to the nose
+    const eyeDistance = Math.abs(leftEye.x - rightEye.x);
+    const eyeNoseDistance = Math.abs((leftEye.y + rightEye.y) / 2 - noseTip.y);
   
-  //   // Calculate the horizontal position of the iris within the eye
-  //   const leftIrisPosition = Math.abs(leftEye.x - leftEyeInner.x);
-  //   const rightIrisPosition = Math.abs(rightEye.x - rightEyeInner.x);
+    // Calculate the horizontal position of the iris within the eye
+    const leftIrisPosition = Math.abs(leftEye.x - leftEyeInner.x);
+    const rightIrisPosition = Math.abs(rightEye.x - rightEyeInner.x);
   
-  //   // Focus condition: Eyes are aligned and looking forward
-  //   const isAligned = eyeDistance < 0.1 && eyeNoseDistance < 0.2;
-  //   const isLookingForward = leftIrisPosition < 0.05 && rightIrisPosition < 0.05;
-  
-  //   return isAligned && isLookingForward;
-  // };
-
-  // Function to detect focus
-const detectFocus = (landmarks) => {
-  if (!landmarks) return false;
-
-  // Get relevant landmarks
-  const leftEye = landmarks[159]; // Left eye landmark
-  const rightEye = landmarks[386]; // Right eye landmark
-  const noseTip = landmarks[1]; // Nose tip landmark
-  const leftEyeInner = landmarks[145]; // Left eye inner corner
-  const rightEyeInner = landmarks[374]; // Right eye inner corner
-
-  // Calculate eye position relative to the nose
-  const eyeDistance = Math.abs(leftEye.x - rightEye.x);
-  const eyeNoseDistance = Math.abs((leftEye.y + rightEye.y) / 2 - noseTip.y);
-
-  // Calculate the horizontal position of the iris within the eye
-  const leftIrisPosition = Math.abs(leftEye.x - leftEyeInner.x);
-  const rightIrisPosition = Math.abs(rightEye.x - rightEyeInner.x);
-
-  // Focus condition: Eyes are looking at the screen (forward)
-  // Current condition is backward - when irises are centered and eyes aligned, 
-  // the person is actually looking at the screen
-  const isAligned = eyeDistance > 0.05 && eyeDistance < 0.2; // Eyes should be reasonably aligned
-  const isLookingForward = Math.abs(leftIrisPosition - rightIrisPosition) < 0.02; // Irises should be symmetrical
-  
-  // When looking at screen, iris is typically centered, not at edge
+    // Focus condition: Eyes are aligned and looking forward
+    const isAligned = eyeDistance < 0.1 && eyeNoseDistance < 0.2;
+    const isLookingForward = leftIrisPosition < 0.05 && rightIrisPosition < 0.05;
+      // When looking at screen, iris is typically centered, not at edge
   const eyesCentered = (leftIrisPosition > 0.01 && leftIrisPosition < 0.04) && 
-                        (rightIrisPosition > 0.01 && rightIrisPosition < 0.04);
+  (rightIrisPosition > 0.01 && rightIrisPosition < 0.04);
   
-  return isAligned && isLookingForward && eyesCentered;
-};
-  
+    return isAligned && isLookingForward;
+  };
+
+
+
   
 
   const onResults = async (results) => {
