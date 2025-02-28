@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { getRecommendations } = require('../arango'); // Import ArangoDB connection
 
 // Task Schema
 const taskSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: String,
   dueDate: Date,
-  duration: { type: Number, required: true }, // Make duration required
+  duration: { type: Number, required: true },
   status: { type: String, default: 'pending' },
   completed: { type: Boolean, default: false },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
@@ -41,7 +42,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
 
 // Create new task
 router.post('/', async (req, res) => {
@@ -81,7 +81,6 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-
 // Delete task
 router.delete('/:id', async (req, res) => {
   try {
@@ -104,4 +103,53 @@ router.delete('/:id', async (req, res) => {
 });
 
 
+// Fetch recommendations based on user study topics
+router.get('/recommendations', async (req, res) => {
+  try {
+    console.log('Recommendations request received, user ID:', req.userId);
+    
+    if (!req.userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+    
+    // Fetch user study topics from MongoDB - get all tasks regardless of due date
+    const tasks = await Task.find({ 
+      userId: req.userId 
+    });
+    
+    console.log(`Found ${tasks.length} tasks for user ${req.userId}`);
+    
+    // Extract topics from task titles and descriptions
+    const studyTopics = [];
+    tasks.forEach(task => {
+      if (task.title) studyTopics.push(task.title);
+      if (task.description) studyTopics.push(task.description);
+    });
+    
+    // Filter out duplicates and empty values
+    const uniqueTopics = [...new Set(studyTopics)].filter(Boolean);
+    console.log('Extracted study topics:', uniqueTopics);
+    
+    // Fetch recommendations from ArangoDB with error handling
+    try {
+      const recommendations = await getRecommendations(uniqueTopics);
+      console.log(`Returning ${recommendations.length} recommendations`);
+      res.json(recommendations);
+    } catch (arangoErr) {
+      console.error('ArangoDB error, using fallback recommendations:', arangoErr);
+      // Provide fallback recommendations
+      const fallbackRecommendations = uniqueTopics.map(topic => ({
+        topic: `More on ${topic}`,
+        confidence: 75,
+        timeEstimate: "2-3 hours",
+        relatedConcepts: ["Key Concepts", "Fundamentals", "Practice Exercises"],
+        description: `Continue your progress with more ${topic} materials.`
+      }));
+      res.json(fallbackRecommendations);
+    }
+  } catch (err) {
+    console.error('Error generating recommendations:', err);
+    res.status(500).json({ error: 'Failed to generate recommendations' });
+  }
+});
 module.exports = router;
