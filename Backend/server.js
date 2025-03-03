@@ -8,6 +8,8 @@ require('dotenv').config();
 // Import the ArangoDB module
 const { testConnection, setupCollections } = require('./arango');
 
+
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -87,7 +89,7 @@ const authMiddleware = async (req, res, next) => {
 const authRoutes = require('./middleware/auth');
 const taskRoutes = require('./routes/tasks');
 const reminderRoutes = require('./routes/reminders');
-// const sessionRoutes = require('./routes/sessionRoutes');
+const focusRoutes = require('./routes/focus');
 
 // Use routes
 app.use('/api/auth', authRoutes(User));
@@ -95,7 +97,7 @@ app.use('/api/auth', authRoutes(User));
 app.use('/api/tasks', authMiddleware, taskRoutes);
 // Use graph routes
 app.use('/api/graph', authMiddleware, require('./routes/graph'));
-// app.use('/api/reminders', authMiddleware, reminderRoutes);
+app.use('/api/focus-data', authMiddleware, focusRoutes);
 
 
 // Root route
@@ -113,7 +115,3 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
-
-

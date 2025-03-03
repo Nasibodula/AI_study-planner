@@ -215,11 +215,75 @@ async function setupCollections() {
   }
 }
 
+//New codes
+
+// Add these functions to your existing exports in arango.js
+async function insertFocusData(focusData) {
+  try {
+    // Create the focus_scores collection if it doesn't exist
+    const collections = await db.collections();
+    const collectionNames = collections.map(c => c.name);
+    
+    if (!collectionNames.includes('focus_scores')) {
+      console.log('Creating focus_scores collection...');
+      await db.createCollection('focus_scores');
+      console.log('Focus scores collection created successfully');
+    }
+    
+    const focusCollection = db.collection('focus_scores');
+    const result = await focusCollection.save(focusData);
+    console.log('Focus data inserted:', result._key);
+    return result;
+  } catch (err) {
+    console.error('Error inserting focus data:', err);
+    throw err;
+  }
+}
+
+async function getUserFocusData(userId) {
+  try {
+    const query = aql`
+      FOR score IN focus_scores
+        FILTER score.user_id == ${userId}
+        SORT score.timestamp DESC
+        RETURN score
+    `;
+    const cursor = await db.query(query);
+    const focusScores = await cursor.all();
+    console.log(`Found ${focusScores.length} focus scores for user ${userId}`);
+    return focusScores;
+  } catch (err) {
+    console.error('Error fetching focus scores:', err);
+    throw err;
+  }
+}
+
+async function getSessionFocusData(sessionId) {
+  try {
+    const query = aql`
+      FOR score IN focus_scores
+        FILTER score.session_id == ${sessionId}
+        SORT score.timestamp ASC
+        RETURN score
+    `;
+    const cursor = await db.query(query);
+    const focusScores = await cursor.all();
+    console.log(`Found ${focusScores.length} focus scores for session ${sessionId}`);
+    return focusScores;
+  } catch (err) {
+    console.error('Error fetching session focus scores:', err);
+    throw err;
+  }
+}
+
 module.exports = {
   db,
   aql,
   testConnection,
   getRecommendations,
   getRelatedConcepts,
-  setupCollections
+  setupCollections,
+  insertFocusData,
+  getUserFocusData,
+  getSessionFocusData
 };

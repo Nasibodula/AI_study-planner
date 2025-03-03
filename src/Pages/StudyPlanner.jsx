@@ -161,22 +161,6 @@ useEffect(() => {
   };
 
 
-
-  const checkAuth = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      console.log('Current token:', token);
-      
-      // Try to make a request to an endpoint that requires authentication
-      const response = await api.get('/api/auth/user');
-      console.log('Authentication check successful:', response.data);
-      return true;
-    } catch (err) {
-      console.error('Authentication check failed:', err.response?.data || err.message);
-      return false;
-    }
-  };
-
   // Rest of your component remains the same
   return (
     <div className="min-h-screen bg-gray-50">
