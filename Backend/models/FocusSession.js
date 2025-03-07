@@ -1,3 +1,4 @@
+// models/focusSession.js
 const mongoose = require('mongoose');
 
 const focusSessionSchema = new mongoose.Schema({
@@ -6,41 +7,50 @@ const focusSessionSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  duration: {
-    type: Number,
-    required: true,
-    min: 60 // minimum 60 seconds (1 minute)
+  startTime: {
+    type: Date,
+    default: Date.now,
+    required: true
   },
-  peakFocus: {
-    type: Number,
-    required: true,
-    min: 0,
-    max: 100
+  endTime: {
+    type: Date
   },
-  distractions: {
+  totalDuration: {
     type: Number,
-    required: true,
     default: 0
   },
-  alerts: [{
-    type: String,
+  focusedDuration: {
+    type: Number,
+    default: 0
+  },
+  peakFocusScore: {
+    type: Number,
+    default: 0
+  },
+  averageFocusScore: {
+    type: Number,
+    default: 0
+  },
+  focusDataPoints: [{
     timestamp: {
       type: Date,
       default: Date.now
-    }
-  }],
-  startTime: {
-    type: Date,
-    required: true,
-    default: Date.now
-  },
-  endTime: {
-    type: Date,
-    required: true
-  }
-}, {
-  timestamps: true
+    },
+    isFocused: {
+      type: Boolean,
+      default: false
+    },
+    eyeDistance: Number,
+    eyeNoseDistance: Number,
+    leftIrisPosition: Number,
+    rightIrisPosition: Number,
+    focusScore: Number
+  }]
 });
+
+// Create indexes for efficient querying
+focusSessionSchema.index({ userId: 1, startTime: -1 });
+focusSessionSchema.index({ userId: 1, 'focusDataPoints.timestamp': 1 });
 
 const FocusSession = mongoose.model('FocusSession', focusSessionSchema);
 

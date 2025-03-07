@@ -89,7 +89,7 @@ const authMiddleware = async (req, res, next) => {
 const authRoutes = require('./middleware/auth');
 const taskRoutes = require('./routes/tasks');
 const reminderRoutes = require('./routes/reminders');
-const focusRoutes = require('./routes/focus');
+const focussTracking = require('./routes/focussTracking')
 
 // Use routes
 app.use('/api/auth', authRoutes(User));
@@ -97,7 +97,7 @@ app.use('/api/auth', authRoutes(User));
 app.use('/api/tasks', authMiddleware, taskRoutes);
 // Use graph routes
 app.use('/api/graph', authMiddleware, require('./routes/graph'));
-app.use('/api/focus-data', authMiddleware, focusRoutes);
+app.use('api/focuss', authMiddleware, focussTracking)
 
 
 // Root route
