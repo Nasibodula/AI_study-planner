@@ -1,0 +1,7 @@
+{
+    "models": {
+      "tinyFaceDetector": "tiny_face_detector_model",
+      "faceLandmark68": "face_landmark_68_model",
+      "faceExpression": "face_expression_model"
+    }
+  }

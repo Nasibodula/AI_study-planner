@@ -1,0 +1,1 @@
+curl -O https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/face_landmark_68_model.weights.bin
