@@ -455,9 +455,27 @@ if __name__ == '__main__':
     print(f"  - http://127.0.0.1:{port}/api/analyze/focus/<user_id>")
     # print(f"  - http://127.0.0.1:{port}/api/analyze/focus/<user_id>")
 
+
+@app.route('/', methods=['GET'])
+def home():
+    """Root endpoint that returns basic API information"""
+    return jsonify({
+        "status": "online",
+        "message": "AI Study Planner API is running",
+        "available_endpoints": [
+            "/api/focus-session",
+            "/api/focus-sessions/<user_id>",
+            "/api/schedule",
+            "/api/schedule/<user_id>",
+            "/api/goals",
+            "/api/goals/<user_id>",
+            "/api/analyze/focus/<user_id>",
+            "/api/suggest/schedule/<user_id>",
+            "/api/visualization/focus-heatmap/<user_id>",
+            "/api/knowledge-graph"
+        ]
+    })
     
     # Run the Flask app
 if __name__ == '__main__':
      app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
-        # port = int(os.environ.get('PORT', 5001))  # Default to 5001
-    # app.run(host='0.0.0.0', port=port)
