@@ -10,6 +10,9 @@ const SmartStudyRecommendations = ({ userId }) => {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Base API URL from environment variables
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
   // Fetch recommendations from the backend
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -30,7 +33,7 @@ const SmartStudyRecommendations = ({ userId }) => {
           return;
         }
         
-        const response = await axios.get('http://localhost:5000/api/tasks/recommendations', {
+        const response = await axios.get(`${API_URL}/api/tasks/recommendations`, {
           headers: { 
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -67,7 +70,7 @@ const SmartStudyRecommendations = ({ userId }) => {
     };
 
     fetchRecommendations();
-  }, [userId]);
+  }, [userId, API_URL]);
 
   // Fetch related topics for a list of topics
   const fetchRelatedTopicsForAll = async (topics, token) => {
@@ -75,7 +78,7 @@ const SmartStudyRecommendations = ({ userId }) => {
     
     for (const topic of topics) {
       try {
-        const response = await axios.get(`http://localhost:5000/api/graph/related-concepts/${encodeURIComponent(topic)}`, {
+        const response = await axios.get(`${API_URL}/api/graph/related-concepts/${encodeURIComponent(topic)}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

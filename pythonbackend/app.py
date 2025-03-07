@@ -23,14 +23,14 @@ CORS(app)  # Enable CORS for all routes, simplified
 client = ArangoClient(hosts=ARANGO_HOST) 
 
 # Connect to "_system" database as root user
-sys_db = client.db('_system', username=ARANGO_USERNAME, password=ARANGO_PASSWORD)
+sys_db = client.db('_system', username='root', password=ARANGO_PASSWORD)
 
 # Create a new database if it doesn't exist
-if not sys_db.has_database(DB_NAME):
-    sys_db.create_database(DB_NAME)
+if not sys_db.has_database( DB_NAME):
+    sys_db.create_database (DB_NAME)
 
 # Connect to the database
-db = client.db('study_planner', username=ARANGO_USERNAME, password=ARANGO_PASSWORD)
+db = client.db(DB_NAME, username='root', password=ARANGO_PASSWORD)
 
 
 # Create collections if they don't exist
@@ -458,6 +458,6 @@ if __name__ == '__main__':
     
     # Run the Flask app
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get('PORT', 5001))  # Default to 5001
-    app.run(host='0.0.0.0', port=port)
+     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
+        # port = int(os.environ.get('PORT', 5001))  # Default to 5001
+    # app.run(host='0.0.0.0', port=port)
