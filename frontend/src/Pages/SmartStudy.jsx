@@ -1,45 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Book, Brain, Clock, Bookmark, ArrowRight, RefreshCw } from 'lucide-react';
 import axios from 'axios';
+import { authService } from '../services/authService'; // Import auth service like in Dashboard
 
-const SmartStudyRecommendations = ({ userId }) => {
+// Create API instance with interceptor
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
+
+// Add token to all requests automatically
+api.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
+
+const SmartStudyRecommendations = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [relatedTopics, setRelatedTopics] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Base API URL from environment variables
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
+  
+  // Make sure we always have the latest user data
+  useEffect(() => {
+    setCurrentUser(authService.getCurrentUser());
+  }, []);
 
   // Fetch recommendations from the backend
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
         setLoading(true);
-        console.log('Fetching recommendations for user:', userId || 'default');
+        console.log('Fetching recommendations for user:', currentUser?.id || 'default');
         
-        // Get token from localStorage safely
-        let token = null;
-        if (typeof window !== 'undefined' && window.localStorage) {
-          token = window.localStorage.getItem('token');
-          console.log('Using authentication token:', token ? 'Token found' : 'No token found');
-        }
-        
-        if (!token) {
-          setError('Authentication required. Please log in.');
-          setLoading(false);
-          return;
-        }
-        
-        const response = await axios.get(`${API_URL}/api/tasks/recommendations`, {
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        // Use the api instance with interceptor instead of axios directly
+        const response = await api.get('/api/tasks/recommendations');
         
         console.log('Received data:', response.data);
         
@@ -52,7 +61,7 @@ const SmartStudyRecommendations = ({ userId }) => {
           ))];
           
           // Fetch related concepts for each topic
-          await fetchRelatedTopicsForAll(topics, token);
+          await fetchRelatedTopicsForAll(topics);
         } else {
           console.warn('Received non-array response:', response.data);
           setRecommendations([]);
@@ -69,20 +78,22 @@ const SmartStudyRecommendations = ({ userId }) => {
       }
     };
 
-    fetchRecommendations();
-  }, [userId, API_URL]);
+    if (currentUser?.id) {
+      fetchRecommendations();
+    } else {
+      setError('User not authenticated. Please log in.');
+      setLoading(false);
+    }
+  }, [currentUser]);
 
   // Fetch related topics for a list of topics
-  const fetchRelatedTopicsForAll = async (topics, token) => {
+  const fetchRelatedTopicsForAll = async (topics) => {
     const topicsData = {};
     
     for (const topic of topics) {
       try {
-        const response = await axios.get(`${API_URL}/api/graph/related-concepts/${encodeURIComponent(topic)}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        // Use the api instance with interceptor
+        const response = await api.get(`/api/graph/related-concepts/${encodeURIComponent(topic)}`);
         
         if (response.data && response.data.relatedConcepts) {
           topicsData[topic] = response.data.relatedConcepts;
