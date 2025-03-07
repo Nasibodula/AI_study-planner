@@ -1,7 +1,7 @@
 // src/services/authService.js
 import axios from 'axios';
 
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const BASE_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5000').replace(/\/$/, '');
 const API_URL = `${BASE_URL}/api/auth`;
 // const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/auth';
 
