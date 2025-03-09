@@ -5,7 +5,7 @@ import ReminderComponent from '../components/Reminder';
 
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
