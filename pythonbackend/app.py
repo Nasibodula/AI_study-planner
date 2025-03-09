@@ -20,17 +20,17 @@ CORS(app)  # Enable CORS for all routes, simplified
 
 # Initialize ArangoDB client
 # You may want to replace these with environment variables
-client = ArangoClient(hosts='https://a114901a4bff.arangodb.cloud:8529') 
+client = ArangoClient(hosts=ARANGO_HOST) 
 
 # Connect to "_system" database as root user
-sys_db = client.db('_system', username='root', password='LAZxkyuWN9SPeACLcGUe')
+sys_db = client.db('_system', username=ARANGO_USERNAME, password=ARANGO_PASSWORD)
 
 # Create a new database if it doesn't exist
 if not sys_db.has_database( DB_NAME):
     sys_db.create_database (DB_NAME)
 
 # Connect to the database
-db = client.db(DB_NAME, username='root', password='LAZxkyuWN9SPeACLcGUe')
+db = client.db(DB_NAME, username=ARANGO_USERNAME, password=ARANGO_PASSWORD)
 
 
 # Create collections if they don't exist
