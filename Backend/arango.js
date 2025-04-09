@@ -2,9 +2,9 @@ const { Database, aql } = require('arangojs');
 
 // Initialize the database connection
 const db = new Database({
-  url: 'https://a114901a4bff.arangodb.cloud:8529',
-  databaseName: 'studyplanner',
-  auth: { username: 'root', password: 'LAZxkyuWN9SPeACLcGUe' },
+  url: 'https://df22fe32aaa0.arangodb.cloud:8529',
+  databaseName: '_system',
+  auth: { username: 'root', password: 'H0FSL0121g5K9mlOYyXf' },
 });
 
 // Test the connection

@@ -9,10 +9,10 @@ from datetime import datetime
 from arango import ArangoClient
 import os
 
-ARANGO_HOST = os.getenv('ARANGO_HOST')
-ARANGO_USERNAME = os.getenv('ARANGO_USERNAME')
-ARANGO_PASSWORD = os.getenv('ARANGO_PASSWORD')
-DB_NAME = 'study_planner'
+ARANGO_HOST = 'https://df22fe32aaa0.arangodb.cloud:8529'
+ARANGO_USERNAME = 'root'
+ARANGO_PASSWORD = 'H0FSL0121g5K9mlOYyXf'
+DB_NAME = '_system'
 
 # Initialize Flask app
 app = Flask(__name__)
